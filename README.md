@@ -1,2 +1,2 @@
-# c-gov-analyzer
+# C-Gov-Analyzer
 Analyzes the C-State performance of Idle Governors
