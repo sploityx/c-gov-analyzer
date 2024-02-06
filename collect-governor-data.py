@@ -17,10 +17,10 @@ def switch_gov(gov: str):
     subprocess.run(cmd, shell=True, check=True)
 
 
-def get_perf_idle_samples(gov: str, workload: str):
+def get_perf_idle_samples(gov: str, workload: str, cpu: int):
     '''Uses perf to get recordings of task events while executing workload'''
     cmds = []
-    cmds.append('sudo perf record -a '
+    cmds.append(f'sudo perf record -C {cpu} '
     '-e sched:sched_switch,power:cpu_frequency,power:cpu_idle,irq:irq_handler_entry,'
     'timer:hrtimer_cancel,power:cpu_idle_miss '
     f'-o {gov}/perf.data -- {workload}')
@@ -37,14 +37,14 @@ def main():
     cpu = 3
     workload = (f'taskset --cpu-list {cpu} '
     'python3 ~/Worky/PM/asset_aq/perf-power-analyzer-post/assets/mini-bench-cpu.py')
-    with open(SYS_PATH + "available_governors") as avail_file:
+    with open(SYS_PATH + "available_governors", encoding='utf-8') as avail_file:
         avail_gov = avail_file.read().split()
-    with open(SYS_PATH + "current_governor") as cur_file:
+    with open(SYS_PATH + "current_governor", encoding='utf-8') as cur_file:
         used_gov = cur_file.read().strip()
     try:
         for gov in avail_gov:
             Path(gov).mkdir(parents=True, exist_ok=True)
-            get_perf_idle_samples(gov, workload)
+            get_perf_idle_samples(gov, workload, cpu)
     finally:
         print(f"Switching back to original Idle Governor: {used_gov}")
         switch_gov(used_gov)
