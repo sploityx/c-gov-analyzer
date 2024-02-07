@@ -44,7 +44,7 @@ def main():
     args = parser.parse_args()
     cpu = args.cpu
     power = args.power
-    workload = (f'taskset --cpu-list {cpu} ./{args.workload}')
+    workload = f'taskset --cpu-list {cpu} ./{args.workload}'
     with open(SYS_PATH + "available_governors", encoding='utf-8') as avail_file:
         avail_gov = avail_file.read().split()
     with open(SYS_PATH + "current_governor", encoding='utf-8') as cur_file:
