@@ -15,27 +15,30 @@ def output_pkg_c(file_name):
     c3_pkg = read_msr(MSR_PKG_C3_RESIDENCY)
     c6_pkg = read_msr(MSR_PKG_C6_RESIDENCY)
     c7_pkg = read_msr(MSR_PKG_C7_RESIDENCY)
-    if os.path.exists(file_name):
-        exec_cmd(f'mv {file_name} {file_name}.old')
     with open(file_name, 'w', encoding='utf-8') as file:
         file.write(f'PKG C2: {c2_pkg}\n')
         file.write(f'PKG C3: {c3_pkg}\n')
         file.write(f'PKG C6: {c6_pkg}\n')
         file.write(f'PKG C7: {c7_pkg}\n')
 
-def calc_pkg_dif(file_fst, file_scnd):
+def calc_pkg_dif(file_out, file_fst, file_scnd):
+    if os.path.exists(file_out):
+        os.remove(file_out)
     with open(file_fst, 'r', encoding='utf-8') as fst:
         with open(file_scnd, 'r', encoding='utf-8') as scnd:
             for (fst_line, scnd_line) in zip(fst, scnd):
-                print(fst_line.split()[0] + ' ' + fst_line.split()[1], end=' ')
-                print(int(fst_line.split()[-1]) - int(scnd_line.split()[-1]))
+                with open(file_out, 'a', encoding='utf-8') as out:
+                    out.write(fst_line.split()[0] + ' ' + fst_line.split()[1] + ' ')
+                    out.write(str(int(scnd_line.split()[-1]) - int(fst_line.split()[-1])))
+                    out.write('\n')
 
 
 def main():
-    output_pkg_c('pkg-c.txt')
-    sleep(5)
-    output_pkg_c('pkg-c.txt')
-    calc_pkg_dif('pkg-c.txt', 'pkg-c.txt.old')
+    for i in range(0,10):
+        output_pkg_c(f'pkg-c-start-{i}.txt')
+        sleep(5)
+        output_pkg_c(f'pkg-c-end-{i}.txt')
+        calc_pkg_dif(f'pkg-c-{i}.txt', f'pkg-c-start-{i}.txt', f'pkg-c-end-{i}.txt')
 
 if __name__ == '__main__':
     main()
