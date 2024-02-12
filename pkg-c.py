@@ -2,6 +2,7 @@
 
 from utils import read_msr
 from utils import exec_cmd
+from time import sleep
 import os
 
 MSR_PKG_C2_RESIDENCY = 0x60D
@@ -26,10 +27,13 @@ def calc_pkg_dif(file_fst, file_scnd):
     with open(file_fst, 'r', encoding='utf-8') as fst:
         with open(file_scnd, 'r', encoding='utf-8') as scnd:
             for (fst_line, scnd_line) in zip(fst, scnd):
+                print(fst_line.split()[0] + ' ' + fst_line.split()[1], end=' ')
                 print(int(fst_line.split()[-1]) - int(scnd_line.split()[-1]))
 
 
 def main():
+    output_pkg_c('pkg-c.txt')
+    sleep(5)
     output_pkg_c('pkg-c.txt')
     calc_pkg_dif('pkg-c.txt', 'pkg-c.txt.old')
 
