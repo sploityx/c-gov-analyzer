@@ -7,8 +7,22 @@ import os
 
 MSR_PKG_C2_RESIDENCY = 0x60D
 MSR_PKG_C3_RESIDENCY = 0x3F8
+# If retention mode is activated, this counter does not increment
 MSR_PKG_C6_RESIDENCY = 0x3F9
 MSR_PKG_C7_RESIDENCY = 0x3FA
+
+# MSR to test if any meaningful data can be gathered
+MSR_PKG_POWER_INFO = 0x614
+"""
+MSR_PKG_ENERGY_STATUS
+MSR_DRAM_ENERGY_STATUS
+MSR_PP0_ENERGY_STATUS
+MSR_PP1_ENERGY_STATUS
+MSR_PLATFORM_ENERGY_STATUS
+MSR_PKG_C8_RESIDENCY
+MSR_PKG_C9_RESIDENCY
+MSR_PKG_C10_RESIDENCY
+"""
 
 def output_pkg_c(file_name):
     c2_pkg = read_msr(MSR_PKG_C2_RESIDENCY)
