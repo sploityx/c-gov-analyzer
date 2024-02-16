@@ -30,15 +30,15 @@ def get_perf_idle_samples(gov: str, workload: str, cpu: int, power: str, pkg : b
     cmds = []
     if pkg:
         pkg_cstates = avail_pkg_cstates()
-        perf_stat = f'sudo perf stat -j -o {PKG_OUTPUT_NAME} -e {pkg_cstates},power/energy-pkg/,power/energy-cores/ -C{cpu} -- '
+        #TODO: use for loop here to not just get summaries
+        perf_stat = (f'sudo perf stat -r 100 -j -o {PKG_OUTPUT_NAME} '
+        f'-e {pkg_cstates},power/energy-pkg/,power/energy-cores/ -C{cpu} -- {workload}')
+        cmds.append(perf_stat)
     perf_rec = (f'sudo perf record -C {cpu} '
     '-e sched:sched_switch,power:cpu_frequency,power:cpu_idle,irq:irq_handler_entry,'
     'timer:hrtimer_cancel,power:cpu_idle_miss '
     f'-o {gov}/perf.data -- {workload}')
-    if pkg:
-        cmds.append(perf_stat + perf_rec)
-    else:
-        cmds.append(perf_rec)
+    cmds.append(perf_rec)
     cmds.append(f"sudo chown {os.getuid()}:{os.getgid()} {gov}/perf.data")
     cmds.append(f"perf script -i {gov}/perf.data -s {power} -- "
         "--mode idle-governor --file-out")
