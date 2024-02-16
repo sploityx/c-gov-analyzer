@@ -8,7 +8,10 @@ It then creates graphs for each governor with the post processing visualizations
 USAGE:
 
 Call this script after collect-governor-data.py and using:
-    ./analyze-governor-data.py
+    ./analyze-governor-data.py -v {PATH_TO_VIS}
+
+Example:
+    ./analyze-governor-data.py -v ../perf-power-analyzer-post/images/idle-governor
 """
 
 from pathlib import Path
