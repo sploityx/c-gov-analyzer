@@ -8,7 +8,7 @@ from utils import exec_cmd
 
 SCRIPT_OUTPUT_NAME = "idle-governor-events.txt"
 RES_OUTPUT_NAME = "c-state-idle-residency.json"
-PKG_OUTPUT_NAME = "pkg-c-state.json"
+PKG_OUTPUT_NAME = "stat-data.json"
 SYS_PATH = "/sys/devices/system/cpu/cpuidle/"
 
 def switch_gov(gov: str):
@@ -30,7 +30,7 @@ def get_perf_idle_samples(gov: str, workload: str, cpu: int, power: str, pkg : b
     cmds = []
     if pkg:
         pkg_cstates = avail_pkg_cstates()
-        perf_stat = f'sudo perf stat -j -o {PKG_OUTPUT_NAME} -e {pkg_cstates} -C{cpu} -- '
+        perf_stat = f'sudo perf stat -j -o {PKG_OUTPUT_NAME} -e {pkg_cstates},power/energy-pkg/,power/energy-cores/ -C{cpu} -- '
     perf_rec = (f'sudo perf record -C {cpu} '
     '-e sched:sched_switch,power:cpu_frequency,power:cpu_idle,irq:irq_handler_entry,'
     'timer:hrtimer_cancel,power:cpu_idle_miss '
@@ -58,7 +58,7 @@ def main():
                         required=True)
     parser.add_argument('-p', '--power', help='Point to Power-Stat module power-statistics.py',
                         required=True)
-    parser.add_argument('-e', '--extended', help='Include C-State for Package Level',
+    parser.add_argument('-e', '--extended', help='Include C-State for Package Level and Energy Information',
                         default = False, action=argparse.BooleanOptionalAction)
     args = parser.parse_args()
     cpu = args.cpu
