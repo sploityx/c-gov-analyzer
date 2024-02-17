@@ -34,7 +34,7 @@ def extended_samples(gov: str, workload: str, cpu: int):
         for _ in range(SAMPLES):
             exec_cmd(perf_stat)
             with open(PKG_OUTPUT_NAME, 'r', encoding='utf-8') as tmp:
-                    gov_pkg.write(tmp.read())
+                gov_pkg.write(tmp.read())
 
 
 
