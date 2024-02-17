@@ -49,5 +49,5 @@ if __name__ == '__main__':
         if os.path.isdir(vis + '/' + gov):
             shutil.rmtree(vis + '/' + gov)
         Path(vis + '/' + gov).mkdir(parents=True, exist_ok=True)
-        utils.exec_shell_cmd(f'mv {vis}/*.png {vis}/{gov}/')
+        utils.exec_cmd(f'mv {vis}/*.png {vis}/{gov}/', shell=True)
         utils.exec_cmd(f'mv {vis}/scatter {vis}/{gov}/')

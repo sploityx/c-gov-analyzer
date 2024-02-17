@@ -3,14 +3,12 @@ import os
 import shlex
 import subprocess
 
-def exec_cmd(cmd: str):
+
+def exec_cmd(cmd: str, shell=False):
     cmd = shlex.split(cmd)
     print(f"{os.path.basename(__file__)} will execute \"{cmd}\" now")
-    subprocess.run(cmd, check=True)
+    subprocess.run(cmd, shell=shell, check=True)
 
-def exec_shell_cmd(cmd: str):
-    print(f"{os.path.basename(__file__)} will execute \"{cmd}\" now")
-    subprocess.run(cmd, shell=True, check=True)
 
 # need sudo rights to access msr device
 def read_msr(msr, cpu=0):

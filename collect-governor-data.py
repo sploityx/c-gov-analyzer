@@ -10,6 +10,7 @@ SCRIPT_OUTPUT_NAME = "idle-governor-events.txt"
 RES_OUTPUT_NAME = "c-state-idle-residency.json"
 PKG_OUTPUT_NAME = "stat-data.json"
 SYS_PATH = "/sys/devices/system/cpu/cpuidle/"
+SAMPLES = 1
 
 def switch_gov(gov: str):
     '''Switches the Idle Governor of a System to gov'''
@@ -25,15 +26,23 @@ def avail_pkg_cstates():
     pkg_names = ','.join(pkg_names)
     return pkg_names
 
-def get_perf_idle_samples(gov: str, workload: str, cpu: int, power: str, pkg : bool):
+def extended_samples(gov: str, workload: str, cpu: int):
+    pkg_cstates = avail_pkg_cstates()
+    perf_stat = (f'sudo perf stat -j -o {PKG_OUTPUT_NAME} '
+    f'-e {pkg_cstates},power/energy-pkg/,power/energy-cores/ -C{cpu} -- {workload}')
+    with open(f'{gov}/{PKG_OUTPUT_NAME}', 'w', encoding='utf-8') as gov_pkg:
+        for _ in range(SAMPLES):
+            exec_cmd(perf_stat)
+            with open(PKG_OUTPUT_NAME, 'r', encoding='utf-8') as tmp:
+                    gov_pkg.write(tmp.read())
+
+
+
+def get_perf_idle_samples(gov: str, workload: str, cpu: int, power: str, pkg: bool):
     '''Uses perf to get recordings of task events while executing workload'''
     cmds = []
     if pkg:
-        pkg_cstates = avail_pkg_cstates()
-        #TODO: use for loop here to not just get summaries
-        perf_stat = (f'sudo perf stat -r 100 -j -o {PKG_OUTPUT_NAME} '
-        f'-e {pkg_cstates},power/energy-pkg/,power/energy-cores/ -C{cpu} -- {workload}')
-        cmds.append(perf_stat)
+        extended_samples(gov, workload, cpu)
     perf_rec = (f'sudo perf record -C {cpu} '
     '-e sched:sched_switch,power:cpu_frequency,power:cpu_idle,irq:irq_handler_entry,'
     'timer:hrtimer_cancel,power:cpu_idle_miss '
@@ -44,10 +53,9 @@ def get_perf_idle_samples(gov: str, workload: str, cpu: int, power: str, pkg : b
         "--mode idle-governor --file-out")
     cmds.append(f"mv {SCRIPT_OUTPUT_NAME} {gov}/{SCRIPT_OUTPUT_NAME}")
     cmds.append(f"mv {RES_OUTPUT_NAME} {gov}/{RES_OUTPUT_NAME}")
-    if pkg:
-        cmds.append(f"mv -f {PKG_OUTPUT_NAME} {gov}/{PKG_OUTPUT_NAME}")
     for cmd in cmds:
         exec_cmd(cmd)
+
 
 def main():
     '''Applies a workload to a core, while recording the perf events'''
