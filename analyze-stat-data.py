@@ -3,7 +3,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.stats import pearsonr
-from sklearn.linear_model import LinearRegression
+import numpy as np
 
 
 def read_data():
@@ -36,12 +36,15 @@ def pkg_pie_chart(df):
 
 def regression(df):
     '''Analysis the regression pkg-states and energy consumption'''
-    df_c_pkg = filter_format(df, 'cstate_pkg')
-    df_power_pkg = filter_format(df, 'power/energy-pkg/')
-    model = LinearRegression()
-    model.fit(df_c_pkg['counter-value'], df_power_pkg['counter-value'])
-    print(f'Coefficients: {model.coef_}')
-    print(f'Intercept: {model.intercept_}')
+    df_c_pkg = filter_format(df, 'cstate_pkg').reset_index(drop=True)
+    df_power_pkg = filter_format(df, 'power/energy-pkg/').reset_index(drop=True)
+    X = df_power_pkg[['counter-value']]
+    y = df_c_pkg['counter-value'].values.reshape(-1, 4)
+    correlation_matrix = np.corrcoef(X.values.flatten(), y.mean(axis=1))
+    print(f'Correlation Matrix: {correlation_matrix}')
+    correlation_coefficient = correlation_matrix[0, 1]
+    print(f'Correlation Coefficient: {correlation_coefficient}')
+
 
 def correlation(df):
     '''Calculates the pearson correlation between pkg c-states and energy consumption'''
@@ -62,6 +65,7 @@ def main():
     '''Visualizes the output of the perf-stat json from the collect wrapper'''
     df = read_data()
     pkg_pie_chart(df)
+    regression(df)
     correlation(df)
 
 
