@@ -2,7 +2,8 @@
 
 import pandas as pd
 import matplotlib.pyplot as plt
-from scipy.stats import spearmanr
+from scipy.stats import pearsonr
+from sklearn.linear_model import LinearRegression
 
 
 def read_data():
@@ -33,13 +34,22 @@ def pkg_pie_chart(df):
     plt.show()
 
 
+def regression(df):
+    '''Analysis the regression pkg-states and energy consumption'''
+    df_c_pkg = filter_format(df, 'cstate_pkg')
+    df_power_pkg = filter_format(df, 'power/energy-pkg/')
+    model = LinearRegression()
+    model.fit(df_c_pkg['counter-value'], df_power_pkg['counter-value'])
+    print(f'Coefficients: {model.coef_}')
+    print(f'Intercept: {model.intercept_}')
+
 def correlation(df):
-    '''Calculates the spearman rank-order correlation between pkg c-states and energy'''
+    '''Calculates the pearson correlation between pkg c-states and energy consumption'''
     df_c_pkg = filter_format(df, 'cstate_pkg')
     df_power_pkg = filter_format(df, 'power/energy-pkg/')
     for _,c_pkg in df_c_pkg.iterrows():
         # we need lots more data for this to work as intented
-        corr_coef, p_value = spearmanr(c_pkg['counter-value'], float(df_power_pkg['counter-value']))
+        corr_coef, p_value = pearsonr(c_pkg['counter-value'], float(df_power_pkg['counter-value']))
         if p_value > 0.5:
             plt.scatter(corr_coef, c_pkg['counter-value'], c='green', label=c_pkg['event'])
         else:
