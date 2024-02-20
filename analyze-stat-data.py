@@ -20,6 +20,15 @@ def filter_cstage_pkg(df):
     return df
 
 
+def divide_by_tsc(row):
+    return row.iloc[:5]['counter-value'] / row.iloc[6]['counter-value']
+
+def calc_perc(df):
+    '''Calculates the percentages by dividing each set through TSC'''
+    df = df.transform(divide_by_tsc, axis=1)
+    return df
+
+
 def calc_poll(df):
     '''Sums up all C-States and adds POLL, which accounts for when a pkg is not in any C-State'''
     df_summed = filter_cstage_pkg(df)
@@ -80,6 +89,7 @@ def main():
     pkg_pie_chart(df_summed)
     regression(df)
     #correlation(df)
+    calc_perc(df)
 
 
 if __name__ == '__main__':
