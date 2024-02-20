@@ -20,16 +20,29 @@ def filter_cstage_pkg(df):
     return df
 
 
+def calc_poll(df):
+    '''Sums up all C-States and adds POLL, which accounts for when a pkg is not in any C-State'''
+    df_summed = filter_cstage_pkg(df)
+    df_summed = df_summed.groupby('event').sum(numeric_only=True).reset_index()
+    total_time = df_summed['event-runtime'].mean()
+    cstate_time = df_summed['counter-value'].sum()
+    df_summed = df_summed.loc[:, ['counter-value', 'event', 'event-runtime']]
+    poll = {'counter-value': total_time - cstate_time, 'event': 'POLL', 'event-runtime': total_time}
+    df_summed.loc[len(df_summed.index)] = poll
+    return df_summed
+
+
 def filter_format(df, event : str):
     '''Filters and formats the dataframe for event'''
-    df = df[df['event'].str.startswith(event)]
-    #df['event'] = df['event'].str.replace(event, '').str[:-1]
+    df = df.loc[df['event'].str.startswith(event)]
     return df
 
 
 def pkg_pie_chart(df):
     '''Creates a pie chart for used C-States on pkg_level'''
-    df_c_pkg = filter_format(df, 'cstate_pkg/')
+    #df_c_pkg = filter_format(df, 'cstate_pkg/')
+    #df_c_pkg = df_c_pkg.groupby('event').sum(numeric_only=True).reset_index()
+    df_c_pkg = df
     plt.pie(df_c_pkg['counter-value'], labels=df_c_pkg['event'], autopct='%1.1f%%', startangle=90)
     plt.show()
 
@@ -51,7 +64,6 @@ def correlation(df):
     df_c_pkg = filter_format(df, 'cstate_pkg')
     df_power_pkg = filter_format(df, 'power/energy-pkg/')
     for _,c_pkg in df_c_pkg.iterrows():
-        # we need lots more data for this to work as intented
         corr_coef, p_value = pearsonr(c_pkg['counter-value'], float(df_power_pkg['counter-value']))
         if p_value > 0.5:
             plt.scatter(corr_coef, c_pkg['counter-value'], c='green', label=c_pkg['event'])
@@ -64,9 +76,10 @@ def correlation(df):
 def main():
     '''Visualizes the output of the perf-stat json from the collect wrapper'''
     df = read_data()
-    pkg_pie_chart(df)
+    df_summed = calc_poll(df)
+    pkg_pie_chart(df_summed)
     regression(df)
-    correlation(df)
+    #correlation(df)
 
 
 if __name__ == '__main__':
