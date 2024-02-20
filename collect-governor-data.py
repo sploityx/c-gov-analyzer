@@ -10,7 +10,7 @@ SCRIPT_OUTPUT_NAME = "idle-governor-events.txt"
 RES_OUTPUT_NAME = "c-state-idle-residency.json"
 PKG_OUTPUT_NAME = "stat-data.json"
 SYS_PATH = "/sys/devices/system/cpu/cpuidle/"
-SAMPLES = 1
+SAMPLES = 20
 
 def switch_gov(gov: str):
     '''Switches the Idle Governor of a System to gov'''
@@ -29,7 +29,7 @@ def avail_pkg_cstates():
 def extended_samples(gov: str, workload: str, cpu: int):
     pkg_cstates = avail_pkg_cstates()
     perf_stat = (f'sudo perf stat -j -o {PKG_OUTPUT_NAME} '
-    f'-e {pkg_cstates},power/energy-pkg/,power/energy-cores/ -C{cpu} -- {workload}')
+    f'-e {pkg_cstates},power/energy-pkg/,power/energy-cores/,msr/TSC/ -C{cpu} -- {workload}')
     with open(f'{gov}/{PKG_OUTPUT_NAME}', 'w', encoding='utf-8') as gov_pkg:
         for _ in range(SAMPLES):
             exec_cmd(perf_stat)
