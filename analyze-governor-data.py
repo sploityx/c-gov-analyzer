@@ -41,7 +41,8 @@ if __name__ == '__main__':
     if extended:
         files.append(PKG_FILE)
     for file in files:
-        utils.exec_cmd(f'mv {vis}/{file} {vis}/{file}.old')
+        if os.path.exists(f'{vis}/{file}'):
+            utils.exec_cmd(f'mv {vis}/{file} {vis}/{file}.old')
     for gov in govs:
         for file in files:
             utils.exec_cmd(f'cp {gov}/{file} {vis}/{file}')
@@ -49,5 +50,6 @@ if __name__ == '__main__':
         if os.path.isdir(vis + '/' + gov):
             shutil.rmtree(vis + '/' + gov)
         Path(vis + '/' + gov).mkdir(parents=True, exist_ok=True)
-        utils.exec_cmd(f'mv {vis}/*.png {vis}/{gov}/', shell=True)
+        utils.mv_wildcard(vis, f'{vis}/{gov}', '*.png')
+        #utils.exec_cmd(f'mv {vis}/*.png {vis}/{gov}/', shell=True)
         utils.exec_cmd(f'mv {vis}/scatter {vis}/{gov}/')
