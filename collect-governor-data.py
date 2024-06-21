@@ -44,8 +44,7 @@ def get_perf_idle_samples(gov: str, workload: str, cpu: int, power: str, pkg: bo
     if pkg:
         extended_samples(gov, workload, cpu)
     perf_rec = (f'sudo perf record -C {cpu} '
-    '-e sched:sched_switch,power:cpu_frequency,power:cpu_idle,irq:irq_handler_entry,'
-    'timer:hrtimer_cancel,power:cpu_idle_miss '
+    '-e sched:sched_switch,power:cpu_idle,power:cpu_idle_miss '
     f'-o {gov}/perf.data -- {workload}')
     cmds.append(perf_rec)
     cmds.append(f"sudo chown {os.getuid()}:{os.getgid()} {gov}/perf.data")
@@ -78,8 +77,9 @@ def main():
     with open(SYS_PATH + "current_governor", encoding='utf-8') as cur_file:
         used_gov = cur_file.read().strip()
     try:
-        for gov in avail_gov:
+        for gov in sorted(avail_gov):
             Path(gov).mkdir(parents=True, exist_ok=True)
+            switch_gov(gov);
             get_perf_idle_samples(gov, workload, cpu, power, extended)
     finally:
         print(f"Switching back to original Idle Governor: {used_gov}")
