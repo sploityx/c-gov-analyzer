@@ -13,13 +13,13 @@ SYS_PATH = "/sys/devices/system/cpu/cpuidle/"
 SAMPLES = 20
 
 def switch_gov(gov: str):
-    '''Switches the Idle Governor of a System to gov'''
+    """Switch the Idle Governor of a System to gov."""
     cmd = f"echo {gov} | sudo tee /sys/devices/system/cpu/cpuidle/current_governor"
     print(f"{os.path.basename(__file__)} will execute \"{cmd}\" now")
     subprocess.run(cmd, shell=True, check=True)
 
 def avail_pkg_cstates():
-    ''' Returns the available pkg-residencies'''
+    """Return available pkg-residencies."""
     pkg_path = '/sys/devices/cstate_pkg/events/'
     event = os.listdir(pkg_path)
     pkg_names = [f'cstate_pkg/{e}/'for e in event]
@@ -39,7 +39,7 @@ def extended_samples(gov: str, workload: str, cpu: int):
 
 
 def get_perf_idle_samples(gov: str, workload: str, cpu: int, power: str, pkg: bool):
-    '''Uses perf to get recordings of task events while executing workload'''
+    """Execute perf to get recordings of task events while executing workload."""
     cmds = []
     if pkg:
         extended_samples(gov, workload, cpu)
@@ -57,7 +57,7 @@ def get_perf_idle_samples(gov: str, workload: str, cpu: int, power: str, pkg: bo
 
 
 def main():
-    '''Applies a workload to a core, while recording the perf events'''
+    """Apply workload to a core, while recording the perf events."""
     parser = argparse.ArgumentParser(description='Records perf data from available Idle Governors.')
     parser.add_argument('-w', '--workload', help='Specify workload file (e.g. mini-bench-cpu.py)',
                         required=True)
